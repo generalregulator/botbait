@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software in research, please cite it as below."
+title: "BotBait: a low-interaction IoT/ADB/router honeypot for threat-intelligence collection"
+type: software
+license: MIT
+version: 1.0.0
+date-released: 2026-10-26
+repository-code: "https://github.com/generalregulator/botbait"
+keywords:
+  - honeypot
+  - IoT
+  - ADB
+  - threat intelligence
+  - MITRE ATT&CK
+  - Mirai
+authors:
+  - name: "generalregulator"

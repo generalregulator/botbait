@@ -1,0 +1,90 @@
+name: iot-honeypot
+
+services:
+  honeypot:
+    build:
+      context: .
+      args:
+        VERSION: ${HP_VERSION:-dev}
+    image: iot-honeypot:${HP_VERSION:-dev}
+    container_name: iot-honeypot
+    restart: unless-stopped
+    stop_grace_period: 30s          # > HP_SHUTDOWN_TIMEOUT so the pipeline can flush
+
+    # ---- identity & privileges -------------------------------------------
+    user: "10001:10001"             # appuser, never root
+    read_only: true                 # immutable root filesystem
+    cap_drop:
+      - ALL                         # no capabilities at all (ports are > 1024)
+    security_opt:
+      - no-new-privileges:true      # setuid binaries cannot escalate
+    privileged: false
+
+    # ---- resource ceilings (a DoS against the honeypot must not become a
+    # ---- DoS against the host) ----------------------------------------------
+    pids_limit: 512
+    mem_limit: 512m
+    cpus: 1.0
+    ulimits:
+      nofile:
+        soft: 4096
+        hard: 4096
+
+    # ---- configuration -----------------------------------------------------
+    env_file:
+      - path: .env
+        required: false
+
+    # ---- network: dedicated bridge, host port -> unprivileged container port
+    # Host ports can be overridden in .env (HP_HOST_PORT_*), e.g. when 7547 is taken.
+    ports:
+      - "${HP_HOST_PORT_ADB:-5555}:5555"      # ADB (HTTP is detected by content as well)
+      - "${HP_HOST_PORT_TR069:-7547}:7547"    # TR-069 / TR-064 (CWMP) - SOAP exploits arrive here
+      - "${HP_HOST_PORT_TELNET:-23}:2323"     # Telnet: port 23 on the host, 2323 inside
+      - "${HP_HOST_PORT_HIKVISION:-80}:8088"  # web persona: Hikvision camera (port 80 on the host)
+      - "${HP_HOST_PORT_TVT:-81}:8081"        # web persona: TVT DVR
+      - "${HP_HOST_PORT_DAHUA:-8080}:8080"    # web persona: Dahua camera
+    healthcheck:
+      test: ["CMD", "/honeypot", "-healthcheck"]
+      interval: 15s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    networks:
+      - honeynet
+
+    # ---- storage -----------------------------------------------------------
+    volumes:
+      # Captured malware. The directory must be owned by UID 10001 (make init-dirs).
+      # Bind mounts cannot carry noexec in Compose: mount this directory from a
+      # dedicated noexec,nosuid,nodev partition on the host (see docs/TECHNICAL_REPORT.md).
+      - type: bind
+        source: ./captured_payloads
+        target: /app/captured_payloads
+        read_only: false
+      # Structured telemetry (JSONL) for offline analysis.
+      - type: bind
+        source: ./data
+        target: /app/data
+        read_only: false
+      # Optional: your own device profile(s), read-only. Then set
+      # HP_PROFILE=/app/profiles/mine.json  (see docs/PROFILES.md)
+      # - type: bind
+      #   source: ./profiles
+      #   target: /app/profiles
+      #   read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  honeynet:
+    driver: bridge
+    # For a stricter setup, attach to an `internal: true` network plus a
+    # dedicated egress proxy that only allows the payload-fetch use case, and
+    # block RFC1918/link-local egress in DOCKER-USER (see docs/TECHNICAL_REPORT.md, "Egress").
