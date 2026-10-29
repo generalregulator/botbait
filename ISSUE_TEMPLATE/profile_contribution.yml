@@ -1,0 +1,21 @@
+name: Device profile contribution
+description: Propose a new device "legend" (see docs/PROFILES.md)
+labels: [profile]
+body:
+  - type: input
+    id: device
+    attributes: { label: Device class, placeholder: "e.g. Hikvision DVR, TP-Link router, Android set-top box" }
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes: { label: Why is it worth emulating?, description: Which botnets/exploits target it (cite sources)? }
+    validations: { required: true }
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: The profile is based on a device I own or on public documentation, not on a leaked image
+          required: true
+        - label: It passes `go test ./internal/profile`
+          required: true

@@ -1,0 +1,14 @@
+name: Feature request
+description: Propose an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: Problem, description: What data or behaviour are you missing? }
+    validations: { required: true }
+  - type: textarea
+    id: idea
+    attributes: { label: Proposal }
+  - type: textarea
+    id: risk
+    attributes: { label: Safety considerations, description: "How does this stay low-interaction (nothing executed, everything bounded)?" }

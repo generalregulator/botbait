@@ -1,0 +1,26 @@
+name: Bug report
+description: Something does not behave as documented
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes: { label: Version, description: Output of `honeypot -version` }
+    validations: { required: true }
+  - type: dropdown
+    id: deploy
+    attributes:
+      label: How are you running it?
+      options: [Docker Compose, install.sh, Binary, go run]
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes: { label: What happened, description: Expected vs. actual behaviour }
+    validations: { required: true }
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: A packet capture, a script, or a Go test. **Remove tokens, IPs you do not want public, and never attach live malware.**
+  - type: textarea
+    id: logs
+    attributes: { label: Logs, render: text }
