@@ -62,6 +62,11 @@ type Config struct {
 	MaxPushBytes       int64
 	PushSessionTimeout time.Duration
 
+	RedactEnabled    bool
+	RedactExtra      string
+	RedactAutodetect bool
+	PublicIPURL      string
+
 	EnrichEnabled bool
 	EnrichTimeout time.Duration
 
@@ -127,6 +132,11 @@ func Load() (*Config, error) {
 		CapturePush:        e.bool("HP_CAPTURE_PUSH", true),
 		MaxPushBytes:       int64(e.int("HP_MAX_PUSH_BYTES", MaxPushBytes)),
 		PushSessionTimeout: e.dur("HP_PUSH_SESSION_TIMEOUT", 60*time.Second),
+
+		RedactEnabled:    e.bool("HP_REDACT_ENABLED", true),
+		RedactExtra:      e.str("HP_REDACT", ""),
+		RedactAutodetect: e.bool("HP_REDACT_AUTODETECT", true),
+		PublicIPURL:      e.str("HP_PUBLIC_IP_URL", "https://api.ipify.org"),
 
 		EnrichEnabled: e.bool("HP_ENRICH_ENABLED", true),
 		EnrichTimeout: e.dur("HP_ENRICH_TIMEOUT", 3*time.Second),
@@ -228,6 +238,7 @@ func (c *Config) Validate() error {
 	chk(c.AlertCooldown >= 0 && c.AlertCampaign >= 0, "HP_ALERT_COOLDOWN and HP_ALERT_CAMPAIGN_COOLDOWN must not be negative")
 	chk(c.AbuseKey == "" || abuseKeyRe.MatchString(c.AbuseKey), "ABUSEIPDB_API_KEY must be 20..128 letters and digits (copy it from the API page of your AbuseIPDB account)")
 	chk(c.AbuseWindow >= time.Hour, "HP_ABUSE_WINDOW must be at least 1h (the same address is reported once per window)")
+	chk(strings.EqualFold(c.PublicIPURL, "off") || c.PublicIPURL == "" || strings.HasPrefix(c.PublicIPURL, "https://"), "HP_PUBLIC_IP_URL must be an https:// URL or \"off\"")
 	chk(c.AlertPayloadMax >= 100 && c.AlertPayloadMax <= 3000, "HP_ALERT_PAYLOAD_MAX must be in 100..3000")
 	_, derr := time.Parse("15:04", c.DigestAt)
 	chk(derr == nil, "HP_DIGEST_AT must be HH:MM (UTC), e.g. 09:00")
