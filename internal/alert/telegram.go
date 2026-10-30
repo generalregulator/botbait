@@ -20,6 +20,7 @@ import (
 	"github.com/generalregulator/botbait/internal/metrics"
 	"github.com/generalregulator/botbait/internal/model"
 	"github.com/generalregulator/botbait/internal/ratelimit"
+	addrredact "github.com/generalregulator/botbait/internal/redact"
 )
 
 const defaultAPI = "https://api.telegram.org"
@@ -35,6 +36,7 @@ type Notifier struct {
 	statePath  string
 	payloadMax int
 	m          *metrics.Metrics
+	red        *addrredact.Redactor
 
 	mu   sync.Mutex
 	seen map[string]time.Time
@@ -45,6 +47,8 @@ type Option func(*Notifier)
 func WithCampaignCooldown(d time.Duration) Option { return func(n *Notifier) { n.campaign = d } }
 
 func WithStateFile(path string) Option { return func(n *Notifier) { n.statePath = path } }
+
+func WithRedactor(r *addrredact.Redactor) Option { return func(n *Notifier) { n.red = r } }
 
 const maxRemembered = 5000
 
@@ -86,7 +90,7 @@ func (n *Notifier) Notify(ctx context.Context, ev *model.Event) (bool, error) {
 		n.m.AlertsRateLimited.Add(1)
 		return false, nil
 	}
-	if err := n.send(ctx, Format(ev, n.payloadMax), Buttons(ev)); err != nil {
+	if err := n.send(ctx, FormatRedacted(ev, n.payloadMax, n.red), Buttons(ev)); err != nil {
 		n.release(keys)
 		n.m.AlertErrors.Add(1)
 		return false, err
