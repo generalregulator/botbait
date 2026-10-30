@@ -22,6 +22,7 @@ import (
 	"github.com/generalregulator/botbait/internal/pipeline"
 	"github.com/generalregulator/botbait/internal/profile"
 	"github.com/generalregulator/botbait/internal/ratelimit"
+	"github.com/generalregulator/botbait/internal/redact"
 	"github.com/generalregulator/botbait/internal/server"
 	"github.com/generalregulator/botbait/internal/session"
 	"github.com/generalregulator/botbait/internal/store"
@@ -127,10 +128,12 @@ func run() int {
 	if cfg.EnrichEnabled {
 		deps.Enrich = enrich.New(cfg.EnrichTimeout, "")
 	}
+	red := newRedactor(ctx, cfg, log)
 	if cfg.TelegramEnabled() {
 		deps.Notifier = alert.NewNotifier(cfg.TelegramToken, cfg.TelegramChatID, "",
 			cfg.TelegramPerMin, cfg.TelegramBurst, cfg.AlertCooldown, cfg.AlertPayloadMax, m,
-			alert.WithCampaignCooldown(cfg.AlertCampaign), alert.WithStateFile(cfg.AlertStatePath()))
+			alert.WithCampaignCooldown(cfg.AlertCampaign), alert.WithStateFile(cfg.AlertStatePath()),
+			alert.WithRedactor(red))
 	} else {
 		log.Warn("Telegram alerting disabled (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set)")
 	}
@@ -236,6 +239,26 @@ func digestOptions(cfg *config.Config, en *enrich.Enricher) *digest.Options {
 		o.Resolve = en.LookupWait
 	}
 	return o
+}
+
+func newRedactor(ctx context.Context, cfg *config.Config, log *slog.Logger) *redact.Redactor {
+	if !cfg.RedactEnabled {
+		return nil
+	}
+	r := redact.New()
+	r.AddList(cfg.RedactExtra)
+	if cfg.RedactAutodetect {
+		r.AddInterfaces()
+		go r.Watch(ctx, cfg.PublicIPURL, 6*time.Hour, func(ip string, err error) {
+			if err != nil {
+				log.Warn("cannot detect the public address for redaction; set HP_REDACT to list it by hand", "err", err)
+				return
+			}
+			log.Info("alerts will hide this server's public address", "addresses", r.Len())
+		})
+	}
+	log.Info("address redaction in alerts enabled", "known", r.Len())
+	return r
 }
 
 func runDigest(cfg *config.Config, log *slog.Logger, send bool) int {
