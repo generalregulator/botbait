@@ -7,6 +7,12 @@ All notable changes are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+* **The sensor's own address is hidden in Telegram alerts** (`internal/redact`): the `Host:` header, URLs and
+  indicators that contain this machine's address are shown as `[REDACTED]`. The sensor learns its addresses by
+  itself (network interfaces, plus its public IP from one HTTPS lookup at start and every 6 h) and accepts extra
+  addresses or host names in `HP_REDACT`. Matching is boundary-aware (`1185.237.185.88` and
+  `185.237.185.880` are not touched), the attacker's own address is never hidden, and the JSONL log on disk keeps the
+  raw text for forensics. Settings: `HP_REDACT_ENABLED`, `HP_REDACT_AUTODETECT`, `HP_PUBLIC_IP_URL`, `HP_REDACT`.
 * **AbuseIPDB auto-reporting** (`internal/abuseipdb`, optional): confirmed attackers are reported with the
   documented `POST /api/v2/report` call (categories 15 / 18 / 20 / 21 / 23 by evidence, comment with ATT&CK ids and a
   defanged dropper URL, no sensor address or personal data). One report per address per `HP_ABUSE_WINDOW` (24 h),
