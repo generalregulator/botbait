@@ -186,3 +186,21 @@ func TestAbuseIPDBSettings(t *testing.T) {
 		t.Fatal("HP_ABUSE_STATE=off must disable the state file")
 	}
 }
+
+func TestRedactionSettings(t *testing.T) {
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !c.RedactEnabled || !c.RedactAutodetect || c.PublicIPURL != "https://api.ipify.org" || c.RedactExtra != "" {
+		t.Fatalf("defaults: %+v", c)
+	}
+	t.Setenv("HP_PUBLIC_IP_URL", "http://plain.example/ip")
+	if _, err := Load(); err == nil || !strings.Contains(err.Error(), "HP_PUBLIC_IP_URL") {
+		t.Fatalf("plain http accepted: %v", err)
+	}
+	t.Setenv("HP_PUBLIC_IP_URL", "off")
+	if _, err := Load(); err != nil {
+		t.Fatalf("off rejected: %v", err)
+	}
+}
