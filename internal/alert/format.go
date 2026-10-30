@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/generalregulator/botbait/internal/model"
+	addrredact "github.com/generalregulator/botbait/internal/redact"
 )
 
 const (
@@ -34,6 +35,44 @@ func cutRunes(s string, n int) string {
 }
 
 func Format(ev *model.Event, payloadMax int) string {
+	return FormatRedacted(ev, payloadMax, nil)
+}
+
+func redactList(r *addrredact.Redactor, in []string, keep string) []string {
+	if len(in) == 0 {
+		return in
+	}
+	out := make([]string, len(in))
+	for i, s := range in {
+		out[i] = r.Apply(s, keep)
+	}
+	return out
+}
+
+func redactEvent(ev *model.Event, r *addrredact.Redactor) *model.Event {
+	c := *ev
+	keep := ev.SrcIP
+	c.Payload = r.Apply(ev.Payload, keep)
+	c.Text = r.Apply(ev.Text, keep)
+	c.IOCs.URLs = redactList(r, ev.IOCs.URLs, keep)
+	c.IOCs.DownloadURLs = redactList(r, ev.IOCs.DownloadURLs, keep)
+	c.IOCs.IPs = redactList(r, ev.IOCs.IPs, keep)
+	c.IOCs.Domains = redactList(r, ev.IOCs.Domains, keep)
+	c.IOCs.NFS = redactList(r, ev.IOCs.NFS, keep)
+	if len(ev.Downloads) > 0 {
+		c.Downloads = make([]model.DownloadResult, len(ev.Downloads))
+		for i, d := range ev.Downloads {
+			d.URL = r.Apply(d.URL, keep)
+			c.Downloads[i] = d
+		}
+	}
+	return &c
+}
+
+func FormatRedacted(ev *model.Event, payloadMax int, r *addrredact.Redactor) string {
+	if r != nil && r.Len() > 0 {
+		ev = redactEvent(ev, r)
+	}
 	payload := strings.ReplaceAll(strings.TrimSpace(firstNonEmpty(ev.Payload, ev.Text)), "\r", "")
 	truncated := ev.Truncated || runeLen(payload) > payloadMax
 	p := cutRunes(payload, payloadMax)
