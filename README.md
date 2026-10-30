@@ -6,7 +6,6 @@
 
 ADB&nbsp;(5555) · TR-069&nbsp;(7547) · Telnet&nbsp;(23) · Hikvision&nbsp;(80) · TVT&nbsp;(81) · Dahua&nbsp;(8080) — one static binary, one command to install.
 
-[![CI](https://github.com/generalregulator/botbait/actions/workflows/ci.yml/badge.svg)](https://github.com/generalregulator/botbait/actions/workflows/ci.yml)
 ![Go](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white)
 ![Dependencies](https://img.shields.io/badge/dependencies-stdlib%20only-brightgreen)
 ![Docker](https://img.shields.io/badge/image-scratch%20%7C%20non--root-2496ED?logo=docker&logoColor=white)
