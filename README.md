@@ -28,9 +28,17 @@ It is built for security research and defensive threat intelligence: run it on a
 
 ## Field Reports
 
-- [November 2026 — IoT Threat Intelligence Report](reports/2026-11/README.md)
-
-  310,231 recorded sessions across three weekly summaries, 777 security alerts, 307 unique source IPs and 73 unique file hashes.
+> [!NOTE]
+> **[November 2026 — IoT Threat Intelligence Report](reports/2026-11/README.md)**
+>
+> Results from real-world honeypot monitoring:
+>
+> - **310,231** network sessions across three weekly summaries
+> - **777** security alerts
+> - **307** unique source IPs
+> - **73** unique file hashes
+>
+> [Read the full report →](reports/2026-11/README.md)
 
 ## Features
 
