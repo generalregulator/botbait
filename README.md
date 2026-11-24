@@ -26,6 +26,12 @@ Internet-facing IoT devices are infected within minutes by botnets that scan the
 
 It is built for security research and defensive threat intelligence: run it on a throw-away VPS, watch the alerts, and analyse the JSONL telemetry offline.
 
+## Field Reports
+
+- [November 2026 — IoT Threat Intelligence Report](reports/2026-11/README.md)
+
+  310,231 recorded sessions across three weekly summaries, 777 security alerts, 307 unique source IPs and 73 unique file hashes.
+
 ## Features
 
 | | |
