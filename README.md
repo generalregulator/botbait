@@ -1,6 +1,11 @@
 <div align="center">
 
-# 🪤 BotBait
+<h1 align="center">
+  🪤 BotBait &nbsp;
+  <a href="https://www.abuseipdb.com/user/365311">
+    <img src="https://www.abuseipdb.com/contributor/365311.svg" alt="AbuseIPDB Contributor" width="150" align="middle">
+  </a>
+</h1>
 
 **A hardened, dependency-free Go honeypot that lures IoT botnets, safely captures what they drop, and tells you about it in Telegram.**
 
