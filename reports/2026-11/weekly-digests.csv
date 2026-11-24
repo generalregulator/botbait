@@ -1,0 +1,4 @@
+start_utc,end_utc,sessions,unique_ips,attacks,samples_captured,reported_to_abuseipdb
+2026-10-26,2026-11-02,227192,1622,459,28,94
+2026-11-09,2026-11-16,32755,784,333,20,77
+2026-11-16,2026-11-23,50284,1966,895,34,154
