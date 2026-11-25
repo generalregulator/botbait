@@ -6,7 +6,7 @@
   <a href="https://www.abuseipdb.com/user/365311">
     <picture>
       <source media="(prefers-color-scheme: dark)"
-        srcset="https://wsrv.nl/?url=www.abuseipdb.com/contributor/365311.svg&amp;bg=white&amp;output=png">
+        srcset="https://wsrv.nl/?url=www.abuseipdb.com/contributor/365311.svg&amp;bg=white&amp;output=png&amp;maxage=300">
       <img src="https://www.abuseipdb.com/contributor/365311.svg"
         alt="AbuseIPDB Contributor" width="230">
     </picture>
